@@ -1,0 +1,37 @@
+{
+  "name": "billit-agent",
+  "version": "0.1.0",
+  "description": "Configurable Billit CLI, SDK, and OpenClaw skill for working with the publicly documented Billit integration lifecycle.",
+  "type": "module",
+  "bin": {
+    "billit-agent": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "dev": "node --loader ts-node/esm src/cli.ts",
+    "test": "node --test --loader ts-node/esm test/**/*.test.ts"
+  },
+  "keywords": [
+    "billit",
+    "cli",
+    "sdk",
+    "openclaw",
+    "skill",
+    "invoicing",
+    "peppol"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

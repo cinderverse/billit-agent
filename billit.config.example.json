@@ -1,0 +1,94 @@
+{
+  "environment": "sandbox",
+  "apiKey": "YOUR_BILLIT_API_KEY",
+  "baseUrls": {
+    "production": "https://api.billit.example",
+    "sandbox": "https://api-sandbox.billit.example"
+  },
+  "auth": {
+    "type": "apiKey",
+    "header": "x-api-key",
+    "prefix": ""
+  },
+  "adapter": {
+    "resources": {
+      "entities.register": {
+        "method": "POST",
+        "path": "/v1/entities"
+      },
+      "entities.get": {
+        "method": "GET",
+        "path": "/v1/entities/{entityId}"
+      },
+      "contacts.list": {
+        "method": "GET",
+        "path": "/v1/contacts"
+      },
+      "contacts.get": {
+        "method": "GET",
+        "path": "/v1/contacts/{contactId}"
+      },
+      "contacts.create": {
+        "method": "POST",
+        "path": "/v1/contacts"
+      },
+      "orders.create": {
+        "method": "POST",
+        "path": "/v1/orders"
+      },
+      "orders.get": {
+        "method": "GET",
+        "path": "/v1/orders/{orderId}"
+      },
+      "orders.list": {
+        "method": "GET",
+        "path": "/v1/orders"
+      },
+      "orders.send": {
+        "method": "POST",
+        "path": "/v1/commandSend"
+      },
+      "orders.status": {
+        "method": "GET",
+        "path": "/v1/orders/{orderId}/status"
+      },
+      "invoices.received.list": {
+        "method": "GET",
+        "path": "/v1/invoices/received"
+      },
+      "invoices.received.get": {
+        "method": "GET",
+        "path": "/v1/invoices/received/{invoiceId}"
+      },
+      "attachments.upload": {
+        "method": "POST",
+        "path": "/v1/attachments"
+      },
+      "attachments.download": {
+        "method": "GET",
+        "path": "/v1/attachments/{attachmentId}"
+      },
+      "identification.start": {
+        "method": "POST",
+        "path": "/v1/identification/start"
+      },
+      "identification.status": {
+        "method": "GET",
+        "path": "/v1/identification/{sessionId}"
+      },
+      "webhooks.register": {
+        "method": "POST",
+        "path": "/v1/webhooks"
+      },
+      "webhooks.list": {
+        "method": "GET",
+        "path": "/v1/webhooks"
+      }
+    }
+  },
+  "defaults": {
+    "headers": {
+      "accept": "application/json"
+    }
+  }
+}
