@@ -1,0 +1,56 @@
+{
+  "environment": "production",
+  "apiKey": "YOUR_BILLIT_API_KEY",
+  "baseUrls": {
+    "production": "https://api.billit.be",
+    "sandbox": "https://api.billit.be"
+  },
+  "auth": {
+    "type": "apiKey",
+    "header": "APIKey",
+    "prefix": ""
+  },
+  "adapter": {
+    "resources": {
+      "account.accountInformation.get": { "method": "GET", "path": "/v1/account/accountInformation" },
+      "account.registercompany.post": { "method": "POST", "path": "/v1/account/registercompany" },
+      "account.ssoToken.get": { "method": "GET", "path": "/v1/account/ssoToken" },
+      "documents.get": { "method": "GET", "path": "/v1/documents" },
+      "documents.post": { "method": "POST", "path": "/v1/documents" },
+      "documents.documentID.get": { "method": "GET", "path": "/v1/documents/{documentID}" },
+      "einvoices.registrations.get": { "method": "GET", "path": "/v1/einvoices/registrations" },
+      "einvoices.registrations.post": { "method": "POST", "path": "/v1/einvoices/registrations" },
+      "einvoices.registrations.registrationID.get": { "method": "GET", "path": "/v1/einvoices/registrations/{registrationID}" },
+      "einvoices.registrations.registrationID.patch": { "method": "PATCH", "path": "/v1/einvoices/registrations/{registrationID}" },
+      "einvoices.registrations.registrationID.delete": { "method": "DELETE", "path": "/v1/einvoices/registrations/{registrationID}" },
+      "einvoices.registrations.registrationID.commands.send.post": { "method": "POST", "path": "/v1/einvoices/registrations/{registrationID}/commands/send" },
+      "einvoices.registrations.registrationID.orders.get": { "method": "GET", "path": "/v1/einvoices/registrations/{registrationID}/orders" },
+      "einvoices.registrations.registrationID.orders.orderID.get": { "method": "GET", "path": "/v1/einvoices/registrations/{registrationID}/orders/{orderID}" },
+      "einvoices.registrations.registrationID.orders.orderID.patch": { "method": "PATCH", "path": "/v1/einvoices/registrations/{registrationID}/orders/{orderID}" },
+      "einvoices.registrations.registrationID.webhooks.get": { "method": "GET", "path": "/v1/einvoices/registrations/{registrationID}/webhooks" },
+      "einvoices.registrations.registrationID.webhooks.post": { "method": "POST", "path": "/v1/einvoices/registrations/{registrationID}/webhooks" },
+      "einvoices.registrations.registrationID.identification.post": { "method": "POST", "path": "/v1/einvoices/registrations/{registrationID}/identification" },
+      "files.fileID.get": { "method": "GET", "path": "/v1/files/{fileID}" },
+      "orders.get": { "method": "GET", "path": "/v1/orders" },
+      "orders.post": { "method": "POST", "path": "/v1/orders" },
+      "orders.orderID.get": { "method": "GET", "path": "/v1/orders/{orderID}" },
+      "orders.orderID.patch": { "method": "PATCH", "path": "/v1/orders/{orderID}" },
+      "orders.orderID.delete": { "method": "DELETE", "path": "/v1/orders/{orderID}" },
+      "orders.commands.send.post": { "method": "POST", "path": "/v1/orders/commands/send" },
+      "parties.get": { "method": "GET", "path": "/v1/parties" },
+      "parties.post": { "method": "POST", "path": "/v1/parties" },
+      "parties.partyID.get": { "method": "GET", "path": "/v1/parties/{partyID}" },
+      "parties.partyID.patch": { "method": "PATCH", "path": "/v1/parties/{partyID}" },
+      "peppol.inbox.get": { "method": "GET", "path": "/v1/peppol/inbox" },
+      "peppol.sendOrder.post": { "method": "POST", "path": "/v1/peppol/sendOrder" },
+      "webhooks.get": { "method": "GET", "path": "/v1/webhooks" },
+      "webhooks.post": { "method": "POST", "path": "/v1/webhooks" },
+      "webhooks.webhookID.delete": { "method": "DELETE", "path": "/v1/webhooks/{webhookID}" }
+    }
+  },
+  "defaults": {
+    "headers": {
+      "accept": "application/json"
+    }
+  }
+}

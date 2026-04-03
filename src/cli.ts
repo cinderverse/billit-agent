@@ -5,6 +5,8 @@ import { BillitClient } from './client.js';
 import { calculateTotals } from './calculations.js';
 import { listOperations } from './adapter.js';
 import { printJson, readOptionalJsonArgOrStdin } from './output.js';
+import { readFileSync } from 'node:fs';
+import { createSwaggerBackedDefaultConfig, extractOperations, type SwaggerV2Spec } from './swagger.js';
 
 const program = new Command();
 program
@@ -23,6 +25,24 @@ program
   .action(() => {
     const config = loadConfig(program.opts().config);
     printJson(listOperations(config));
+  });
+
+program
+  .command('swagger-operations')
+  .description('List operations directly from a Billit Swagger v2 JSON file')
+  .requiredOption('-f, --file <path>', 'Path to swagger JSON')
+  .action((options) => {
+    const spec = JSON.parse(readFileSync(options.file, 'utf8')) as SwaggerV2Spec;
+    printJson(extractOperations(spec));
+  });
+
+program
+  .command('swagger-config')
+  .description('Generate a default Billit config from a Billit Swagger v2 JSON file')
+  .requiredOption('-f, --file <path>', 'Path to swagger JSON')
+  .action((options) => {
+    const spec = JSON.parse(readFileSync(options.file, 'utf8')) as SwaggerV2Spec;
+    printJson(createSwaggerBackedDefaultConfig(spec));
   });
 
 program

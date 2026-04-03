@@ -10,70 +10,79 @@ This project was intentionally based only on public online information available
   - Billit offers a developer-facing integration program.
   - They advertise documentation, code examples, and an API for developers.
 
-### 2. Billit public API docs root/search results
-- URL family: https://docs.accesspoint.billit.eu/
-- Public evidence established from discoverable search snippets:
-  - There is a Billit API documentation site.
-  - Public topics include:
-    - Authentication
-    - Sandbox vs Production
-    - Create Entities / registering companies
-    - Identification process
-    - Sending sales invoices
-    - Retrieve a list of invoices
-    - Get status of a sales invoice
-    - Calculations
-    - Webhooks
-    - Getting received invoices
-    - Support
+### 2. Live Billit Swagger v1 document
+- URL: https://api.billit.be/swagger/docs/v1
+- Public evidence established directly from the live JSON:
+  - Swagger version: `2.0`
+  - API title: `Billit.API`
+  - host: `api.billit.be`
+  - scheme: `https`
+  - 71 concrete REST paths were visible at build time.
 
-### 3. Public search snippet for authentication
-- Search result title/snippet indicated:
-  - Authentication method uses an API key.
-  - API key is available in the Billit application profile of a user with access to the master account.
+### 3. Concrete path families visible in the live Swagger
+The live Swagger exposed concrete REST endpoints for:
 
-### 4. Public search snippet for sending
-- Search result title/snippet indicated:
-  - Sending sales invoices is supported.
-  - Integrators map their dataset to a Billit JSON structure.
-  - Billit can transfer combined data to supported networks.
+- account information / sso token / company registration / sequences / license
+- accountant feeds
+- cashbook
+- daily receipt books
+- documents
+- e-invoice registrations, integrations, identification, send, orders, files, webhooks
+- files
+- financial transactions
+- gl accounts
+- journals
+- misc company search + type codes
+- OAuth2 token + revoke
+- orders, payments, booking entries, send, eSign, deleted orders
+- parties
+- peppol participants, inbox, confirm/refuse, sendOrder, participantInformation
+- products
+- reports
+- toProcess uploads
+- global webhooks
 
-### 5. Public search snippet for retrieving invoices
-- Search result title/snippet indicated:
-  - There is a list API endpoint for retrieving invoices.
-  - Single-invoice retrieval is available in JSON format.
+### 4. Concrete models visible in the live Swagger
+The live Swagger definitions exposed models such as:
 
-### 6. Public search snippet for status
-- Search result title/snippet indicated:
-  - Sales invoice delivery/status retrieval is supported.
-  - Users may also see delivery info in the Billit UI, but API feedback is available.
+- `Order`
+- `Party`
+- `Document`
+- `File`
+- `Webhook`
+- `RegisterAccountRequestModel`
+- `RegisterAccountResponse`
+- `CreateAndSendEDocumentPost`
+- `CreateAndSendEdocumentResponse`
+- `OAuthAccessTokenRequest`
+- `SendRequest`
+- `KYCInitiationPost`
+- `KYCInitiationResponse`
 
-### 7. Public search snippet for identification
-- Search result title/snippet indicated:
-  - There is a customer/entity identification flow.
-  - The process involves provider completion and redirect/validation behavior.
+### 5. Specific details established from the live Swagger
+Examples of concrete facts visible in the spec:
 
-### 8. Public search snippet for sandbox vs production
-- Search result title/snippet indicated:
-  - Billit provides separate production and sandbox-style environments.
+- `/v1/orders` supports `GET` and `POST`
+- `/v1/orders/{orderID}` supports `GET`, `PATCH`, and `DELETE`
+- `/v1/orders/commands/send` exists
+- `/v1/parties` supports `GET` and `POST`
+- `/v1/webhooks` supports `GET` and `POST`
+- `/v1/einvoices/registrations/{registrationID}/identification` exists and initiates KYC
+- `/OAuth2/token` and `/OAuth2/revoke` exist
+- `RegisterAccountResponse` includes an `APIKey` field
+- `Webhook` includes fields like `EntityType`, `EntityUpdateType`, `WebhookURL`, and `Secret`
+- `SendRequest` includes `OrderIds`, `TransportType`, and `PrintType`
 
-### 9. Public search snippet for webhooks
-- Search result title/snippet indicated:
-  - Billit can push HTTPS webhook calls with JSON payloads to a registered URL.
+## Important caveat
 
-### 10. Public PDF search snippet
-- URL: https://www.billit.eu/media/fq4llng1/api-diagram.pdf
-- Search result snippet indicated concepts such as:
-  - `v1/orders`
-  - `v1/commandSend`
-  - polling or webhook updates
-- Because the PDF content was not cleanly extractable in this environment, these path hints were treated as suggestive public evidence, not absolute truth.
+The live Swagger did **not** expose a formal `securityDefinitions` block in the fetched document.
+That means the repo can now be Swagger-grounded for paths and shapes, but auth header handling remains configurable rather than asserted as absolute truth from the spec alone.
 
 ## Design consequence
 
-Because the public docs were partially protected by anti-bot measures from this environment, this repo does **not** hardcode the full Billit API as if it were fully verified. Instead it:
+Because we now have the live Swagger, this repo no longer has to guess the major Billit endpoint families. It now:
 
-- models the publicly evidenced lifecycle comprehensively
-- keeps endpoint paths/methods configurable via adapter config
-- includes a raw logical-operation escape hatch
-- documents exactly which assumptions need account-level confirmation before production use
+- vendors the fetched Swagger as `swagger-v1.json`
+- extracts logical operations from the real Billit paths
+- can generate a Swagger-backed config
+- still keeps adapter/auth settings configurable for account-specific correctness

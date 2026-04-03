@@ -9,10 +9,11 @@ Use the repo-local Billit toolkit instead of improvising direct API calls.
 
 ## Start here
 
-1. Read `docs/notes-public-sources.md` to understand what is publicly confirmed.
-2. Read `billit.config.example.json` and the active config file to see how logical operations map to concrete Billit endpoints.
-3. Prefer the CLI for one-off automation and shell workflows.
-4. Prefer the SDK when embedding Billit access into a larger TypeScript service.
+1. Read `docs/notes-public-sources.md` to understand what is publicly confirmed from the live Swagger.
+2. Read `swagger-v1.json` and `swagger-v1.billit.config.example.json` first.
+3. Read the active config file to see whether the logical operations were kept as generated or customized.
+4. Prefer the CLI for one-off automation and shell workflows.
+5. Prefer the SDK when embedding Billit access into a larger TypeScript service.
 
 ## CLI patterns
 
@@ -20,31 +21,49 @@ List configured operations:
 
 ```bash
 npm run build
-node dist/cli.js --config ./billit.config.json operations
+node dist/src/cli.js --config ./billit.config.json operations
+```
+
+Inspect live Swagger operations:
+
+```bash
+node dist/src/cli.js swagger-operations --file ./swagger-v1.json
+```
+
+Generate config from Swagger:
+
+```bash
+node dist/src/cli.js swagger-config --file ./swagger-v1.json
 ```
 
 Raw logical operation:
 
 ```bash
-node dist/cli.js --config ./billit.config.json raw \
-  --operation orders.list \
-  --query '{"page":1}'
+node dist/src/cli.js --config ./billit.config.json raw \
+  --operation orders.get \
+  --query '{"fullTextSearch":"ACME"}'
 ```
 
-Create and send an order:
+Create and send an order using real Swagger-grounded keys:
 
 ```bash
-node dist/cli.js --config ./billit.config.json order-create --body @stdin
-node dist/cli.js --config ./billit.config.json order-send --order-id 123 --body '{"channel":"peppol"}'
+node dist/src/cli.js --config ./billit.config.json raw \
+  --operation orders.post \
+  --body '{"OrderType":"Invoice","Customer":{"Name":"ACME"}}'
+
+node dist/src/cli.js --config ./billit.config.json raw \
+  --operation orders.commands.send.post \
+  --body '{"OrderIds":[123],"TransportType":"Peppol"}'
 ```
 
 ## Rules
 
-- Do not assume the default example endpoints are production-correct; verify against the active Billit docs/account.
-- If a needed operation is missing, extend the adapter config instead of hardcoding a random path in application code.
-- Use the `raw` command first for sandbox exploration of newly documented operations.
-- For webhook work, use the helpers in `src/webhooks.ts` and align signature handling with current Billit docs.
+- Prefer the Swagger-grounded config over the older generic example config.
+- Do not hardcode random paths; extract from Swagger or add explicit adapter mappings.
+- Use the `raw` command first when exploring a new Billit endpoint family.
+- For webhook work, use the helpers in `src/webhooks.ts` and align signature handling with current Billit docs/account behavior.
 - For calculations or local validation logic, keep business rules separate from transport code.
+- If the Swagger changes, refresh `swagger-v1.json`, regenerate the config, then update tests.
 
 ## When to read more
 

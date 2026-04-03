@@ -2,35 +2,34 @@
 
 A configurable Billit integration toolkit for Node.js and OpenClaw.
 
-It is designed to be useful **right now** without pretending to know private or unstable Billit endpoint details. The repo combines:
+It is now grounded against the live Billit Swagger v1 document at `https://api.billit.be/swagger/docs/v1`, while still keeping an adapter layer for future-proofing and account-specific adjustments. The repo combines:
 
 - a TypeScript SDK/client
 - a CLI (`billit-agent`)
 - an OpenClaw skill under `skills/billit/`
 - adapter-driven request mapping so you can cover the full Billit lifecycle
 
-## Why it is adapter-driven
+## Why it still has an adapter layer
 
-Billit publicly exposes a developer program and public API-documentation topics that establish the broad integration surface, but their docs are not fully machine-readable from this environment because parts of the docs are shielded by anti-bot protections.
+The repo now has a concrete Billit Swagger v1 source, but keeping the adapter layer is still useful because it gives you:
 
-So this project is deliberately split into two layers:
-
-1. **Confirmed public integration concepts**
-   - API-key authentication
-   - sandbox vs production environments
-   - company/entity registration
-   - identification flow
-   - sales invoice / order creation and sending
-   - invoice retrieval and status tracking
-   - calculations guidance
+1. **Real Billit coverage based on the live Swagger spec**
+   - account endpoints
+   - orders
+   - parties
+   - documents
+   - files
    - webhooks
+   - e-invoice registrations / integrations / identification / send
+   - peppol inbox and direct send
+   - OAuth token endpoints present in the spec
 
-2. **Configurable endpoint adapter**
-   - logical operations such as `orders.create` and `webhooks.register`
-   - configurable paths, methods, auth header naming, and base URLs
-   - raw logical requests for anything Billit exposes now or later
+2. **A stable logical layer for automations and coding agents**
+   - logical operations can be generated from Swagger
+   - account-specific overrides remain possible without rewriting code
+   - raw logical requests still work for newly added or less-frequently used operations
 
-This gives you a repo that is honest about what is confirmed, while still being broad enough to connect a coding agent to Billit end-to-end.
+This means the toolkit is now both Swagger-grounded **and** practical for automation.
 
 ## Install
 
@@ -41,18 +40,18 @@ npm run build
 
 ## Configure
 
-Copy the example file and fill in your real values:
+Copy the Swagger-grounded example file and fill in your real values:
 
 ```bash
-cp billit.config.example.json billit.config.json
+cp swagger-v1.billit.config.example.json billit.config.json
 ```
 
 Then edit:
 
 - `apiKey`
-- production/sandbox base URLs
-- auth header details
-- adapter resource mappings if needed
+- optionally, base URLs if Billit gives you a different sandbox host
+- auth details if your account integration differs
+- adapter resource mappings only if you want custom logical aliases
 
 You can pass the config explicitly:
 
@@ -74,30 +73,48 @@ export BILLIT_CONFIG=./billit.config.json
 billit-agent operations
 ```
 
+### Inspect operations from the live Billit Swagger JSON
+
+```bash
+billit-agent swagger-operations --file ./swagger-v1.json
+```
+
+### Generate a Swagger-backed config
+
+```bash
+billit-agent swagger-config --file ./swagger-v1.json
+```
+
 ### Create an order / sales invoice draft
 
 ```bash
-billit-agent order-create --body '{"customer":{"name":"ACME"},"lines":[{"description":"Consulting","quantity":1,"unitPrice":100,"vatRate":21}]}'
+billit-agent raw \
+  --operation orders.post \
+  --body '{"OrderType":"Invoice","Customer":{"Name":"ACME"}}'
 ```
 
-### Send an order
-
-```bash
-billit-agent order-send --order-id 123 --body '{"channel":"peppol"}'
-```
-
-### Get status
-
-```bash
-billit-agent order-status 123
-```
-
-### Raw logical operation
+### Send one or more orders
 
 ```bash
 billit-agent raw \
-  --operation orders.list \
-  --query '{"page":1,"limit":50}'
+  --operation orders.commands.send.post \
+  --body '{"OrderIds":[123],"TransportType":"Peppol"}'
+```
+
+### Get an order
+
+```bash
+billit-agent raw \
+  --operation orders.orderID.get \
+  --path-params '{"orderID":123}'
+```
+
+### List parties
+
+```bash
+billit-agent raw \
+  --operation parties.get \
+  --query '{"fullTextSearch":"acme"}'
 ```
 
 ### Local totals helper
@@ -106,28 +123,32 @@ billit-agent raw \
 billit-agent calculate --lines '[{"quantity":2,"unitPrice":10,"vatRate":21}]'
 ```
 
-## Logical operations covered by the default example adapter
+## Swagger-grounded operation coverage
 
-- `entities.register`
-- `entities.get`
-- `contacts.list`
-- `contacts.get`
-- `contacts.create`
-- `orders.create`
-- `orders.get`
-- `orders.list`
-- `orders.send`
-- `orders.status`
-- `invoices.received.list`
-- `invoices.received.get`
-- `attachments.upload`
-- `attachments.download`
-- `identification.start`
-- `identification.status`
-- `webhooks.register`
-- `webhooks.list`
+The repo now includes `swagger-v1.json` and a generated example config `swagger-v1.billit.config.example.json` based on the live spec.
 
-These are **logical** operations. Confirm and adjust concrete endpoints against the current Billit docs/account before using in production.
+The live Swagger currently exposes 71 Billit paths including:
+
+- account info / SSO / company registration / license
+- accountant feeds
+- cashbook
+- daily receipts
+- documents
+- e-invoice registrations, integrations, send, orders, identification, webhooks
+- files
+- financial transaction imports
+- GL accounts / journals import
+- misc company search and type codes
+- OAuth2 token + revoke
+- orders + payments + booking entries + send + eSign + deleted
+- parties
+- peppol participants / inbox / confirm / refuse / sendOrder / participant info
+- products
+- reports
+- toProcess uploads
+- global webhooks
+
+Use `billit-agent swagger-operations --file ./swagger-v1.json` to inspect the extracted logical operation list.
 
 ## SDK usage
 
@@ -178,13 +199,27 @@ Current tests cover:
 
 See `docs/notes-public-sources.md`.
 
+## What is now concretely established from Swagger
+
+From the live spec, this repo now directly knows:
+
+- host: `api.billit.be`
+- scheme: `https`
+- concrete REST paths for the listed operations
+- path/query/body parameter structure for those operations
+- many public model names and response shapes
+- presence of `/OAuth2/token` and `/OAuth2/revoke`
+- presence of fields such as `RegisterAccountResponse.APIKey`
+
+The Swagger does **not** appear to declare a formal `securityDefinitions` block, so the default config still keeps auth header handling configurable. The generated example uses `APIKey` because that string appears in the live spec and response models, but you should verify against your live account behavior.
+
 ## What you should do before production use
 
-1. Confirm the exact Billit production and sandbox base URLs.
-2. Confirm whether auth uses `x-api-key`, `Authorization`, or another header in your account/docs.
-3. Confirm exact endpoint paths for each operation you want.
-4. If needed, extend `billit.config.json` with any newly documented resources.
-5. Run a sandbox smoke test with the `raw` command before automating real invoice flows.
+1. Confirm the exact authentication header/flow for your Billit account.
+2. Confirm whether a distinct sandbox host exists for your environment.
+3. Run a smoke test against a harmless endpoint like account info.
+4. If needed, regenerate/refresh config from a newer Swagger export.
+5. Add any missing convenience wrappers you want on top of the raw logical operations.
 
 ## License
 

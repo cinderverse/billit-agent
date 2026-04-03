@@ -5,3 +5,4 @@ export * from './request-builder.js';
 export * from './client.js';
 export * from './calculations.js';
 export * from './webhooks.js';
+export * from './swagger.js';
